@@ -70,8 +70,7 @@ target_link_libraries(
   spdlog
   stb
   tinyobjloader
-  OpenGL::GL
-  )
+  OpenGL::GL)
 
   
 # OPTIONS

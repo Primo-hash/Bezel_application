@@ -8,15 +8,15 @@
 class PacmanGame : public engine::AppFrame {
 public:
 	PacmanGame() : AppFrame() {
-		//pushLayer(new ExampleLayer());
-		pushLayer(new GameLayer);
+		//pushLayer(NEW ExampleLayer());
+		pushLayer(NEW GameLayer);
 	}
 
 
 	PacmanGame(engine::WindowSpecs specs) : AppFrame(specs) {
 		setAppIcon("assets/textures/pacman3.png");	// Window icon
 
-		pushLayer(new GameLayer);
+		pushLayer(NEW GameLayer);
 	}
 
 

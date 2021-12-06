@@ -59,7 +59,7 @@ namespace engine {
 
 		// Context options
 		glfwSetWindowUserPointer(m_Window, &m_Specs);	// Window context details
-		setVSync(true);									// Vsync on by default
+		setVSync(false);									// Vsync off by default
 
 		/*
 		The following callback functions utilize the GLFW library to abstract window events

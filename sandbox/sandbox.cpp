@@ -119,14 +119,14 @@ private:
 class Sandbox : public engine::AppFrame {
 public:
 	Sandbox() : engine::AppFrame() {
-		//pushLayer(new ExampleLayer());
-		pushLayer(new SandboxLayer);
+		//pushLayer(NEW ExampleLayer());
+		pushLayer(NEW SandboxLayer);
 	}
 
 
 	Sandbox(engine::WindowSpecs specs) : engine::AppFrame(specs) {
 		//pushLayer(new ExampleLayer());
-		pushLayer(new SandboxLayer);
+		pushLayer(NEW SandboxLayer);
 	}
 
 

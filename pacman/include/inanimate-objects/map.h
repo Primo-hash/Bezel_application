@@ -51,13 +51,13 @@ private:
 	engine::ObjectLibrary* s_ObjectLibrary;
 	engine::ShaderLibrary* s_ShaderLibrary;
 
-	Pacman* m_Player;
-	std::vector<Ghost*> m_Ghosts;	//Initialising an array of ghosts
+	engine::s_Ptr<Pacman> m_Player;
+	std::vector<engine::s_Ptr<Ghost>> m_Ghosts;	//Initialising an array of ghosts
 
-	std::vector<Wall*> m_Walls;
-	std::vector<Pellet*> m_Pellets;
+	std::vector<engine::s_Ptr<Wall>> m_Walls;
+	std::vector<engine::s_Ptr<Pellet>> m_Pellets;
 
-	Collision* m_Collision = new Collision();
+	engine::s_Ptr <Collision> m_Collision = engine::m_SPtr<Collision>();
 };
 
 Map::Map() {
@@ -103,12 +103,12 @@ Map::Map() {
 			switch (value) {
 			case 1:		// Wall
 			{
-				m_Walls.push_back(new Wall(i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z, 0.f, 3.f, 3.f));
+				m_Walls.push_back(engine::m_SPtr<Wall>(i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z, 0.f, 3.f, 3.f));
 				break;
 			}
 			case 2:		// Player/Pacman
 			{
-				m_Player = new Pacman();
+				m_Player = engine::m_SPtr<Pacman>();
 				m_Player->setPosition({ i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z });
 				m_Player->setNextPosition({ i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z });
 				m_Player->setSize({ 1.5f, 1.5f, 1.5f });
@@ -116,14 +116,14 @@ Map::Map() {
 				break;
 			}
 			case 0:	// Pellets and Ghosts
-				m_Pellets.push_back(new Pellet(i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z, 0.5f, 0.5f, 0.5f));
+				m_Pellets.push_back(engine::m_SPtr<Pellet>(i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z, 0.5f, 0.5f, 0.5f));
 	
 				// Ghost random position generation
 				randomNumber = numDistribution(rando);
 	
 				// Generate new random number for random ghost placement
 				if (randomNumber == 3 && m_Ghosts.size() < 4) {
-					m_Ghosts.push_back(new Ghost());
+					m_Ghosts.push_back(engine::m_SPtr<Ghost>());
 					m_Ghosts.back()->setPosition({ i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z });
 					m_Ghosts.back()->setNextPosition({ i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z });
 					m_Ghosts.back()->setSize({ 1.5f, 1.5f, 1.5f });

@@ -94,7 +94,11 @@ target_compile_definitions(Engine PUBLIC GLFW_INCLUDE_NONE ENABLE_ASSERTS)	# Uni
 if (WIN32 OR CYGWIN)
     # WINDOWS AND CYGWIN COMPILER
 	target_compile_definitions(Engine PUBLIC PLATFORM_WINDOWS)
-    target_compile_options(Engine PRIVATE /EHsc /MDd /c /MP)	# Multithreading for libraries
+	if(CMAKE_BUILD_TYPE STREQUAL "Debug")	# Check build type for multithreading application
+		target_compile_options(Engine PRIVATE /EHsc /MDd /c /MP)	# Multithreading for libraries
+	else()
+		target_compile_options(Engine PRIVATE /EHsc /MD /c /MP)	# Multithreading for libraries
+	endif()
 endif (WIN32 OR CYGWIN)
 if (UNIX)
     # UNIX (including MAC OS X)
@@ -105,7 +109,7 @@ endif (UNIX)
 # DLL exporting specific steps
 set_target_properties(Engine PROPERTIES PUBLIC_HEADER 
 	include/engine.h
-	)
+)
 
 # C++ 17 required
 set_property(TARGET Engine PROPERTY CXX_STANDARD 17)

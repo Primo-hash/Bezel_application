@@ -55,8 +55,8 @@ namespace engine {
 		Static members
 	*/
 	s_Ptr<RenderAPI> Renderer::s_RenderAPI = m_SPtr<RenderAPI>();
-	engine::ObjectLibrary* Renderer::s_ObjectLibrary = new engine::ObjectLibrary();
-	engine::ShaderLibrary* Renderer::s_ShaderLibrary = new engine::ShaderLibrary();
+	engine::ObjectLibrary* Renderer::s_ObjectLibrary = NEW engine::ObjectLibrary();
+	engine::ShaderLibrary* Renderer::s_ShaderLibrary = NEW engine::ShaderLibrary();
 	static RendererStorage s_Data;
 	static RendererStorage3D s_3DData;
 
@@ -73,7 +73,7 @@ namespace engine {
 			DATA DEFINITION FOR QUAD DRAWING
 		*/
 		s_Data.quadVertexArray = m_SPtr<VertexArray>();
-		s_Data.quadVertexBufferStore = new QuadVertex[s_Data.MAXVERTICES];
+		s_Data.quadVertexBufferStore = NEW QuadVertex[s_Data.MAXVERTICES];
 
 		// Vertex default positioning
 		s_Data.quadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
@@ -93,7 +93,7 @@ namespace engine {
 		s_Data.quadVertexArray->setVertexBuffer(s_Data.quadVertexBuffer);
 
 		// Index
-		uint32_t* quadIndices = new uint32_t[s_Data.MAXINDICES];
+		uint32_t* quadIndices = NEW uint32_t[s_Data.MAXINDICES];
 		// Set indices to ptr
 		uint32_t offset = 0;
 		for (uint32_t i = 0; i < s_Data.MAXINDICES; i += 6) {
