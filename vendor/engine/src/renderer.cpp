@@ -1,4 +1,5 @@
 #include "engine/include/graphics/renderer.h"
+#include <set>
 
 
 namespace engine {
@@ -7,6 +8,9 @@ namespace engine {
 		const uint32_t MAXPOLYGONS = 1000000;				// Maximum count of polygons to be drawn on single draw call
 		const uint32_t MAXPOLYVERTICES = MAXPOLYGONS * 3;	// Maximum polygon count vertices
 		const uint32_t MAXPOLYINDICES = MAXPOLYGONS * 3;	// Maximum polygon count indices
+
+		GLuint VAO;
+		GLuint VBO;
 
 		std::map<std::string, std::vector<PolyVertex>> verticesMap;
 		std::map<std::string, std::vector<unsigned int>> indicesMap;
@@ -38,8 +42,8 @@ namespace engine {
 		s_Ptr<Texture> whiteTexture;				 // Generating textures/ flat colors
 
 		uint32_t quadIndexCount = 0;				 // Current index count
-		QuadVertex* quadVertexBufferStore = nullptr;
-		QuadVertex* quadVertexBufferPtr = nullptr;
+		s_Ptr<std::vector<QuadVertex>> quadVertexBufferStore;
+		s_Ptr<std::vector<QuadVertex>> quadVertexBufferPtr;
 		glm::vec4 quadVertexPositions[4];			 // For applying vertex positions on a loop
 
 		// TEXTURE SLOTS
@@ -73,8 +77,8 @@ namespace engine {
 			DATA DEFINITION FOR QUAD DRAWING
 		*/
 		s_Data.quadVertexArray = m_SPtr<VertexArray>();
-		s_Data.quadVertexBufferStore = NEW QuadVertex[s_Data.MAXVERTICES];
-
+		//s_Data.quadVertexBufferStore = NEW QuadVertex[s_Data.MAXVERTICES];
+		s_Data.quadVertexBufferStore = m_SPtr<std::vector<QuadVertex>>(s_Data.MAXVERTICES);
 		// Vertex default positioning
 		s_Data.quadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
 		s_Data.quadVertexPositions[1] = {  0.5f, -0.5f, 0.0f, 1.0f };
@@ -268,6 +272,9 @@ namespace engine {
 		s_3DData.polyIndexBuffer.reset();
 		s_3DData.polyVertexArray.reset();
 
+		// clean VAO
+		cleanVAO(s_3DData.VAO);
+
 		// RESET quad ptrs
 		s_Data.quadIndexCount = 0;
 		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferStore;
@@ -342,7 +349,8 @@ namespace engine {
 		glm::mat4 transform = 
 			glm::translate(glm::mat4(1.0f), position) *
 			glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-
+		
+		/*
 		// Iterate and set attributes of quad in vertex buffer
 		for (uint32_t i = 0; i < s_Data.QUADVERTEXCOUNT; i++)
 		{
@@ -352,6 +360,19 @@ namespace engine {
 			s_Data.quadVertexBufferPtr->texID = texID;
 			s_Data.quadVertexBufferPtr->tileCount = tileCount;
 			s_Data.quadVertexBufferPtr++;
+		}
+		*/
+
+		int idx = 0;
+
+		// Iterate and set attributes of quad in vertex buffer
+		for (auto it = s_Data.quadVertexBufferPtr->begin(); idx < s_Data.QUADVERTEXCOUNT; it++) {
+			it->position = transform * s_Data.quadVertexPositions[idx];
+			it->color = color;
+			it->texCoord = s_Data.textureCoordMapping[idx];
+			it->texID = texID;
+			it->tileCount = tileCount;
+			idx++;
 		}
 			  
 		s_Data.quadIndexCount += 6;	// Increment index count for potential next buffer
@@ -398,6 +419,7 @@ namespace engine {
 			glm::translate(glm::mat4(1.0f), position) *
 			glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
+		/*
 		// Iterate and set attributes of quad in vertex buffer
 		for (uint32_t i = 0; i < s_Data.QUADVERTEXCOUNT; i++)
 		{
@@ -408,7 +430,19 @@ namespace engine {
 			s_Data.quadVertexBufferPtr->tileCount = tileCount;
 			s_Data.quadVertexBufferPtr++;
 		}
+		*/
 		
+		int idx = 0;
+
+		// Iterate and set attributes of quad in vertex buffer
+		for (auto it = s_Data.quadVertexBufferPtr->begin(); idx < s_Data.QUADVERTEXCOUNT; it++) {
+			it->position = transform * s_Data.quadVertexPositions[idx];
+			it->color = s_Data.DEFAULTCOLOR;
+			it->texCoord = s_Data.textureCoordMapping[idx];
+			it->texID = texID;
+			it->tileCount = tileCount;
+			idx++;
+		}
 		
 		s_Data.quadIndexCount += 6;	// Increment index count for potential next buffer
 	}
@@ -440,6 +474,7 @@ namespace engine {
 			glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f }) *
 			glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
+		/*
 		// Iterate and set attributes of quad in vertex buffer
 		for (uint32_t i = 0; i < s_Data.QUADVERTEXCOUNT; i++)
 		{
@@ -449,6 +484,19 @@ namespace engine {
 			s_Data.quadVertexBufferPtr->texID = texID;
 			s_Data.quadVertexBufferPtr->tileCount = tileCount;
 			s_Data.quadVertexBufferPtr++;
+		}
+		*/
+
+		int idx = 0;
+
+		// Iterate and set attributes of quad in vertex buffer
+		for (auto it = s_Data.quadVertexBufferPtr->begin(); idx < s_Data.QUADVERTEXCOUNT; it++) {
+			it->position = transform * s_Data.quadVertexPositions[idx];
+			it->color = color;
+			it->texCoord = s_Data.textureCoordMapping[idx];
+			it->texID = texID;
+			it->tileCount = tileCount;
+			idx++;
 		}
 
 		s_Data.quadIndexCount += 6;	// Increment index count for potential next buffer
@@ -497,6 +545,7 @@ namespace engine {
 			glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f }) *
 			glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
+		/*
 		// Iterate and set attributes of quad in vertex buffer
 		for (uint32_t i = 0; i < s_Data.QUADVERTEXCOUNT; i++)
 		{
@@ -506,6 +555,19 @@ namespace engine {
 			s_Data.quadVertexBufferPtr->texID = texID;
 			s_Data.quadVertexBufferPtr->tileCount = tileCount;
 			s_Data.quadVertexBufferPtr++;
+		}
+		*/
+
+		int idx = 0;
+
+		// Iterate and set attributes of quad in vertex buffer
+		for (auto it = s_Data.quadVertexBufferPtr->begin(); idx < s_Data.QUADVERTEXCOUNT; it++) {
+			it->position = transform * s_Data.quadVertexPositions[idx];
+			it->color = s_Data.DEFAULTCOLOR;
+			it->texCoord = s_Data.textureCoordMapping[idx];
+			it->texID = texID;
+			it->tileCount = tileCount;
+			idx++;
 		}
 
 		s_Data.quadIndexCount += 6;	// Increment index count for potential next buffer
@@ -664,7 +726,7 @@ namespace engine {
 		glm::vec4 color,
 		int texID) {
 
-		RawShape s = s_ObjectLibrary->get(name);
+		RawShape s (s_ObjectLibrary->get(name));	// Copy loaded object from library
 
 		//For each shape defined in the obj file
 		for (auto shape : s.shapes) {
@@ -672,18 +734,18 @@ namespace engine {
 			for (auto meshIndex : shape.mesh.indices) {
 				//And store the data for each vertice, including normals
 				glm::vec3 vertice = {
-					s.attrib.vertices[meshIndex.vertex_index * 3] + position.x,
-					s.attrib.vertices[(meshIndex.vertex_index * 3) + 1] + position.y,
-					s.attrib.vertices[(meshIndex.vertex_index * 3) + 2] + position.z
+					s.attrib.vertices[(double)meshIndex.vertex_index * 3] + position.x,
+					s.attrib.vertices[((double)meshIndex.vertex_index * 3) + 1] + position.y,
+					s.attrib.vertices[((double)meshIndex.vertex_index * 3) + 2] + position.z
 				};
 				glm::vec3 normal = {
-					s.attrib.normals[meshIndex.normal_index * 3],
-					s.attrib.normals[(meshIndex.normal_index * 3) + 1],
-					s.attrib.normals[(meshIndex.normal_index * 3) + 2]
+					s.attrib.normals[(double)meshIndex.normal_index * 3],
+					s.attrib.normals[((double)meshIndex.normal_index * 3) + 1],
+					s.attrib.normals[((double)meshIndex.normal_index * 3) + 2]
 				};
 				glm::vec2 textureCoordinate = {                         //These go unnused, but if you want textures, you will need them.
-					s.attrib.texcoords[meshIndex.texcoord_index * 2],
-					s.attrib.texcoords[(meshIndex.texcoord_index * 2) + 1]
+					s.attrib.texcoords[(double)meshIndex.texcoord_index * 2],
+					s.attrib.texcoords[((double)meshIndex.texcoord_index * 2) + 1]
 				};
 
 				PolyVertex vertex = PolyVertex();
@@ -696,19 +758,18 @@ namespace engine {
 				vertices.push_back(vertex); //We add our new vertice struct to our vector
 			}
 		}
-
 	}
 
 	GLuint Renderer::compileModel(std::vector<PolyVertex>& vertices) {
-		GLuint VAO;
-		glGenVertexArrays(1, &VAO);
-		glBindVertexArray(VAO);
+		//GLuint VAO;
+		glGenVertexArrays(1, &s_3DData.VAO);
+		glBindVertexArray(s_3DData.VAO);
 
-		GLuint VBO;
-		glGenBuffers(1, &VBO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		//GLuint VBO;
+		glGenBuffers(1, &s_3DData.VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, s_3DData.VBO);
 		
-		//As you can see, OpenGL will accept a vector of structs as a valid input here
+		
 		glBufferData(GL_ARRAY_BUFFER, sizeof(PolyVertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(0);
@@ -729,7 +790,38 @@ namespace engine {
 		//This will be needed later to specify how much we need to draw. Look at the main loop to find this variable again.
 		s_3DData.vertexCount = vertices.size();
 
-		return VAO;
+		return s_3DData.VAO;
 	}
 
+	void Renderer::cleanVAO(GLuint& vao)
+	{
+		GLint nAttr = 0;
+		std::set<GLuint> vbos;
+
+		GLint eboId;
+		glGetVertexArrayiv(vao, GL_ELEMENT_ARRAY_BUFFER_BINDING, &eboId);
+		glDeleteBuffers(1, (GLuint*)&eboId);
+
+		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nAttr);
+		glBindVertexArray(vao);
+
+		for (int iAttr = 0; iAttr < nAttr; ++iAttr)
+		{
+			GLint vboId = 0;
+			glGetVertexAttribiv(iAttr, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &vboId);
+			if (vboId > 0)
+			{
+				vbos.insert(vboId);
+			}
+
+			glDisableVertexAttribArray(iAttr);
+		}
+
+		for (auto vbo : vbos)
+		{
+			glDeleteBuffers(1, &vbo);
+		}
+
+		glDeleteVertexArrays(1, &vao);
+	}
 }

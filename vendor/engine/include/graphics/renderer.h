@@ -12,13 +12,15 @@
 #include "object-library.h"
 #include "shader.h"
 #include "texture.h"
-#include <tiny_obj_loader.h>
+#include <tiny_obj_loader.h> 
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 
 namespace engine {
 
 	/*
-	Medium for storing vertex data before processing
+Medium for storing vertex data before processing
 */
 	struct QuadVertex
 	{
@@ -39,6 +41,11 @@ namespace engine {
 		glm::vec4 color;
 		glm::vec2 texCoord;
 		float texID;
+
+		// Override == operator with custom for vertex optimization
+		bool operator==(const PolyVertex& other) const {
+			return position == other.position && normal == other.normal && color == other.color && texCoord == other.texCoord && texID == other.texID;
+		}
 	};
 
 	class Renderer {
@@ -70,6 +77,7 @@ namespace engine {
 			int texID);
 
 		static GLuint compileModel(std::vector<PolyVertex>& vertices);
+		static void cleanVAO(GLuint& vao);
 
 		/*
 			Following param descriptions:
@@ -111,4 +119,16 @@ namespace engine {
 		static engine::ShaderLibrary* s_ShaderLibrary;
 	};
 
+}
+
+// In std namespace define a template specialization for PolyVertex comparison to exist
+namespace std {
+	template<> struct hash<engine::PolyVertex> {
+		size_t operator()(engine::PolyVertex const& vertex) const {
+			return ((hash<glm::vec3>()(vertex.position) ^ (hash<glm::vec3>()(vertex.normal) << 1)) >> 1) ^
+				(hash<glm::vec4>()(vertex.color) << 1) ^
+				(hash<glm::vec2>()(vertex.texCoord) << 1) ^
+				(hash<float>()(vertex.texID) << 1);
+		}
+	};
 }
