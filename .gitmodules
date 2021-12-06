@@ -1,0 +1,24 @@
+[submodule "vendor/engine/vendor/glfw"]
+	path = vendor/engine/vendor/glfw
+	url = https://github.com/glfw/glfw
+	branch = 3.3-stable
+[submodule "vendor/engine/vendor/glad"]
+	path = vendor/engine/vendor/glad
+	url = https://github.com/Dav1dde/glad
+	branch = master
+[submodule "vendor/engine/vendor/glm"]
+	path = vendor/engine/vendor/glm
+	url = https://github.com/g-truc/glm
+	branch = master
+[submodule "vendor/engine/vendor/spdlog"]
+	path = vendor/engine/vendor/spdlog
+	url = https://github.com/gabime/spdlog
+	branch = v1.x
+[submodule "vendor/engine/vendor/stb/src"]
+	path = vendor/engine/vendor/stb/src
+	url = https://github.com/nothings/stb
+	branch = master
+[submodule "vendor/engine/vendor/tinyobj"]
+	path = vendor/engine/vendor/tinyobj
+	url = https://github.com/tinyobjloader/tinyobjloader.git
+	branch = master
