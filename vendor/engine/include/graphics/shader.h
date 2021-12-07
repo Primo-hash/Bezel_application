@@ -37,6 +37,9 @@ namespace engine {
 		void addUniformFloat3(const std::string& name, const glm::vec3& value);
 		void addUniformFloat4(const std::string& name, const glm::vec4& value);
 
+		void addUniformVec3(const std::string& name, const glm::vec3& value);
+		void addUniformVec2(const std::string& name, const glm::vec2& value);
+
 		void addUniformMat3(const std::string& name, const glm::mat3& matrix);
 		void addUniformMat4(const std::string& name, const glm::mat4& matrix);
 	

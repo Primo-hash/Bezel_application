@@ -95,6 +95,16 @@ namespace engine {
 		glUniform4f(location, value.x, value.y, value.z, value.w);
 	}
 
+	void Shader::addUniformVec2(const std::string& name, const glm::vec2& value) {
+		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform2fv(location, 1,  &value[0]);
+	}
+
+	void Shader::addUniformVec3(const std::string& name, const glm::vec3& value) {
+		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform3fv(location, 1, &value[0]);
+	}
+
 	void Shader::addUniformMat3(const std::string& name, const glm::mat3& matrix) {
 		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));

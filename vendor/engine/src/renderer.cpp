@@ -175,7 +175,12 @@ namespace engine {
 		s_Data.viewProjectionMatrix = camera.getViewProjectionMatrix();
 
 		s_3DData.lightingShader->bind();
+		// In Vertex shader
 		s_3DData.lightingShader->addUniformMat4("u_ViewProjection", camera.getViewProjectionMatrix());
+		// In Fragment shader
+		s_3DData.lightingShader->addUniformVec3("u_LightColor", { 1.0f, 1.0f, 1.0f });
+		s_3DData.lightingShader->addUniformVec3("u_LightPosition", camera.getPosition());
+		s_3DData.lightingShader->addUniformVec3("u_ViewPosition", camera.getPosition());
 		
 		s_Data.textureShader->bind();
 		s_Data.textureShader->addUniformMat4("u_ViewProjection", camera.getViewProjectionMatrix());
