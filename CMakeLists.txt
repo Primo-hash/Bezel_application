@@ -75,6 +75,7 @@ target_link_libraries(
   
 # OPTIONS
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+set(default_build_type "Release")
 
 include_directories(${PROJECT_NAME} INTERFACE 
 	${CMAKE_CURRENT_LIST_DIR}
