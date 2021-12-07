@@ -96,10 +96,10 @@ Map::Map() {
 	// Assign all positions per ID
 	for (int i = 0; i < ROWMAX; i++) {
 		offsetY = 0;
-		offsetX += 2.f;
+		offsetX += 1.f;
 		for (int j = 0; j < COLUMNMAX; j++) {
 			int value = m_MapMatrix[i][j];
-			offsetY += 2.f;
+			offsetY += 1.f;
 			switch (value) {
 			case 1:		// Wall
 			{
