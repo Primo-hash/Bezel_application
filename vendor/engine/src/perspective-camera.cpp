@@ -6,7 +6,7 @@ namespace engine {
 		Constructs glm orthographic projection and inserts custom position parameters
 	*/
 	PerspectiveCamera::PerspectiveCamera(float aspectRatio, float fov) :
-		m_ProjectionMatrix(glm::perspective(fov, aspectRatio, 0.1f, 100.0f)), 
+		m_ProjectionMatrix(glm::perspective(fov, aspectRatio, 0.1f, 10000.0f)), 
 		m_ViewMatrix(1.0f) {
 		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
@@ -15,7 +15,7 @@ namespace engine {
 		Sets the camera view projection matrix based on parameters and current view matrix
 	*/
 	void PerspectiveCamera::setProjection(float aspectRatio, float fov) {
-		m_ProjectionMatrix = glm::perspective(fov, aspectRatio, 0.1f, 100.0f);
+		m_ProjectionMatrix = glm::perspective(fov, aspectRatio, 0.1f, 10000.0f);
 		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
 
