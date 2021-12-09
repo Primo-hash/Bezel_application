@@ -57,4 +57,11 @@ namespace engine {
 		glDrawArrays(GL_TRIANGLES, 0, size);
 	}
 
+	/*
+		Draw raw vertex array in parameter on screen
+	*/
+	void RenderAPI::drawVAOInstanced(GLuint& VAO, unsigned int size, unsigned int num_instances) {
+		glBindVertexArray(VAO);
+		glDrawArraysInstanced(GL_TRIANGLES, 0, size, num_instances);
+	}
 }

@@ -55,6 +55,7 @@ add_library(Engine STATIC
 	"include/graphics/buffer.h" "include/graphics/vertex-array.h" "include/graphics/shader.h" 
 	"include/graphics/texture.h" "include/graphics/renderer.h" "include/graphics/renderAPI.h"
 	"include/graphics/object-library.h" "include/graphics/3D-processing/mesh-data.h"
+	"include/graphics/storage.h"
 
 	# ./include/graphics/camera
 	"include/graphics/camera/camera-controller.h" "include/graphics/camera/orthographic-camera.h"
@@ -72,7 +73,7 @@ add_library(Engine STATIC
 
 	# ./
 	"engine.h"
-	 )
+	)
 
 
 # Links libraries to engine

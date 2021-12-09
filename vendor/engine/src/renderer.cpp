@@ -1,60 +1,7 @@
 #include "engine/include/graphics/renderer.h"
-#include <set>
-
+#include "engine/include/graphics/storage.h"
 
 namespace engine {
-
-	struct RendererStorage3D {
-		const uint32_t MAXPOLYGONS = 1000000;				// Maximum count of polygons to be drawn on single draw call
-		const uint32_t MAXPOLYVERTICES = MAXPOLYGONS * 3;	// Maximum polygon count vertices
-		const uint32_t MAXPOLYINDICES = MAXPOLYGONS * 3;	// Maximum polygon count indices
-
-		GLuint VAO;
-		GLuint VBO;
-
-		std::map<std::string, std::vector<PolyVertex>> verticesMap;
-		std::map<std::string, std::vector<unsigned int>> indicesMap;
-		std::vector<PolyVertex> vertices;			// Stored vertices for batch rendering	
-		unsigned int vertexCount;
-		//std::vector<unsigned int> indices;			// Current indices for vertices
-
-		// VERTEX DATA
-		s_Ptr<VertexArray> polyVertexArray;			 // Polygon data
-		s_Ptr<VertexBuffer> polyVertexBuffer;		 // Custom buffer for single/multiple vertices w/layout handling
-		s_Ptr<IndexBuffer> polyIndexBuffer;			 // Custom index buffer
-		s_Ptr<Shader> lightingShader;				 // Uploading shaders
-	};
-
-	struct RendererStorage {
-		static const uint32_t QUADVERTEXCOUNT = 4;			// No. of vertices per quad
-		static const uint32_t MAXTEXTURESLOTS = 32;	// Depends on hardware, but pc's should be ok with this maximum
-		const uint32_t MAXQUADS = 1000000;			// Maximum count of squares to be drawn on single draw call
-		const uint32_t MAXVERTICES = MAXQUADS * 4;	// Maximum square count vertices
-		const uint32_t MAXINDICES = MAXQUADS * 6;	// Maximum square count indices
-		const glm::vec2 textureCoordMapping[QUADVERTEXCOUNT] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
-		const glm::vec4 DEFAULTCOLOR = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-
-		// VERTEX DATA
-		s_Ptr<VertexArray> quadVertexArray;			 // Quad data
-		s_Ptr<VertexBuffer> quadVertexBuffer;		 // Custom buffer for single/multiple vertices w/layout handling
-		s_Ptr<Shader> textureShader;				 // Uploading textures
-		s_Ptr<Texture> whiteTexture;				 // Generating textures/ flat colors
-
-		uint32_t quadIndexCount = 0;				 // Current index count
-		s_Ptr<std::vector<QuadVertex>> quadVertexBufferStore;
-		s_Ptr<std::vector<QuadVertex>> quadVertexBufferPtr;
-		glm::vec4 quadVertexPositions[4];			 // For applying vertex positions on a loop
-
-		// TEXTURE SLOTS
-		// Utilizing std::array since Texture has no default constructor to setup w/partial specialization
-		std::array<s_Ptr<Texture>, MAXTEXTURESLOTS> textureSlots;
-		uint32_t textureSlotIndex = 1;				 // Index 0 reserved for white texture
-
-		// SCENE DATA
-		glm::mat4 viewProjectionMatrix;
-	};
-
 	/*
 		Static members
 	*/
@@ -63,7 +10,7 @@ namespace engine {
 	engine::ShaderLibrary* Renderer::s_ShaderLibrary = NEW engine::ShaderLibrary();
 	static RendererStorage s_Data;
 	static RendererStorage3D s_3DData;
-
+	static DepthMapStorage s_ShadowMap;
 
 	/*
 		Sets up storage components with engine specific specs of quads, shader and textured quads
@@ -72,6 +19,9 @@ namespace engine {
 	Renderer::Renderer() {
 		// Init 3D shader before begin scene
 		s_3DData.lightingShader = s_ShaderLibrary->load("assets/shaders/lighting-shader.glsl");
+
+		// Configurate the shadow map
+		configDepthMap();
 
 		/*
 			DATA DEFINITION FOR QUAD DRAWING
@@ -174,14 +124,30 @@ namespace engine {
 	void Renderer::beginScene(PerspectiveCamera& camera) {
 		s_Data.viewProjectionMatrix = camera.getViewProjectionMatrix();
 
+		// Depth of scene variables to depth shader
+		// Orthographic projection to capture the whole scene
+		s_ShadowMap.lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, s_ShadowMap.NEAR_PLANE, s_ShadowMap.NEAR_PLANE);
+		s_ShadowMap.lightView = glm::lookAt(camera.getPosition(), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		s_ShadowMap.lightSpaceMatrix = s_ShadowMap.lightProjection * s_ShadowMap.lightView;
+
+
 		s_3DData.lightingShader->bind();
-		// In Vertex shader
+		// In Vertex shader ViewProjection Matrix
 		s_3DData.lightingShader->addUniformMat4("u_ViewProjection", camera.getViewProjectionMatrix());
-		// In Fragment shader
+		s_3DData.lightingShader->addUniformMat4("u_LightSpaceMatrix", s_ShadowMap.lightSpaceMatrix);
+		// In Fragment shader lighting
 		s_3DData.lightingShader->addUniformVec3("u_LightColor", { 1.0f, 1.0f, 1.0f });
 		s_3DData.lightingShader->addUniformVec3("u_LightPosition", camera.getPosition());
 		s_3DData.lightingShader->addUniformVec3("u_ViewPosition", camera.getPosition());
-		
+		// In Fragment shader shadows
+		s_3DData.lightingShader->addUniformInt("u_DiffuseTexture", 0);
+		s_3DData.lightingShader->addUniformInt("u_ShadowMap", 1);
+
+		// Bind and add space matrix
+		s_ShadowMap.depthShader->bind();
+		s_ShadowMap.depthShader->addUniformMat4("u_LightSpaceMatrix", s_ShadowMap.lightSpaceMatrix);
+
+		// 2D shaders
 		s_Data.textureShader->bind();
 		s_Data.textureShader->addUniformMat4("u_ViewProjection", camera.getViewProjectionMatrix());
 		
@@ -200,78 +166,29 @@ namespace engine {
 			return;
 		}
 
-		// 2D Object PROCESSING
-
-		/*
-		// Calculate how much of allowed data used before issuing size and issuing draw call
-		uint32_t dataSize = (uint8_t*)s_Data.quadVertexBufferPtr - (uint8_t*)s_Data.quadVertexBufferStore;
-		s_Data.quadVertexBuffer->setData(s_Data.quadVertexBufferStore, dataSize);
-		
-		// Texture binding by ID
-
+		// SHADOWMAP RENDER
+		s_RenderAPI->setViewport(0, 0, s_ShadowMap.WIDTH, s_ShadowMap.HEIGHT);
+		glBindFramebuffer(GL_FRAMEBUFFER, s_ShadowMap.depthMapFBO);
+		s_RenderAPI->clear();
 		// Bind only as many textures as inserted by engine and application
 		for (uint32_t i = 0; i < s_Data.textureSlotIndex; i++) {
 			s_Data.textureSlots[i]->bind(i);
 		}
-
-
-		// DRAW call for 2D quads
-		s_RenderAPI->drawIndexed(s_Data.quadVertexArray, s_Data.quadIndexCount);
-
-		*/
-
-		/*
-		std::vector<PolyVertex> vertices;
-		std::vector<unsigned int> indices;
-
-		/*
-			DATA SUBMISSION FOR 3D DRAWING
-		
-		for (const auto& [key, val] : s_3DData.verticesMap) {
-
-			vertices.insert(vertices.end(), s_3DData.verticesMap[key].begin(), s_3DData.verticesMap[key].end());
-			indices.insert(indices.end(), s_3DData.indicesMap[key].begin(), s_3DData.indicesMap[key].end());
-
-		}
-
-		// RESET 3D object ptrs for next batch
-		s_3DData.verticesMap.clear();
-		s_3DData.indicesMap.clear();
-
-		// DATA DEF
-		s_3DData.polyVertexArray = m_SPtr<VertexArray>();
-		// Vertex buffer and index buffer set later when rendering all saved objects
-
-		// 3D Object PROCESSING
-		// VBO & Buffer layout
-		s_3DData.polyVertexBuffer = m_SPtr<VertexBuffer>(vertices, (int)vertices.size() * sizeof(PolyVertex));
-		s_3DData.polyVertexBuffer->setLayout({
-			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float3,   "a_Normal" },
-			{ ShaderDataType::Float4,	 "a_Color" },
-			{ ShaderDataType::Float2, "a_TexCoord" },
-			{ ShaderDataType::Float,     "a_TexID" }
-		});
-
-		// IBO
-		s_3DData.polyIndexBuffer = m_SPtr<IndexBuffer>(&indices[0], (unsigned int)indices.size());
-
-		// VAO
-		s_3DData.polyVertexArray->setVertexBuffer(s_3DData.polyVertexBuffer);
-		s_3DData.polyVertexArray->setIndexBuffer(s_3DData.polyIndexBuffer);
-		*/
-
-		// Bind only as many textures as inserted by engine and application
-		for (uint32_t i = 0; i < s_Data.textureSlotIndex; i++) {
-			s_Data.textureSlots[i]->bind(i);
-		}
-
-		// DRAW call for 3D objects
-		//submit(s_3DData.lightingShader, s_3DData.polyVertexArray);	// executes draw with custom shader
 		GLuint VAO = compileModel(s_3DData.vertices);
+		submit(s_ShadowMap.depthShader, VAO);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// Reset scene
+		AppFrame& appInstance = AppFrame::get();
+		s_RenderAPI->setViewport(0, 0, appInstance.getWindow().getWidth(), appInstance.getWindow().getHeight());
+		s_RenderAPI->clear();
+
+		// ACTUAL 3D RENDER
+		//submit(s_3DData.lightingShader, s_3DData.polyVertexArray);	// executes draw with custom shader
 		submit(s_3DData.lightingShader, VAO);	// executes draw with custom shader
 
 		s_3DData.vertices.clear();	// VERY IMPORTANTE
+		s_3DData.vertexCount = 0;
 
 		s_3DData.polyVertexBuffer.reset();
 		s_3DData.polyIndexBuffer.reset();
@@ -284,6 +201,9 @@ namespace engine {
 		s_Data.quadIndexCount = 0;
 		s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferStore;
 		s_Data.textureSlotIndex = 1;
+
+		// Clear textures
+		glBindTexture(GL_TEXTURE_2D, 0);	// Remove binding
 	}
 
 	/*
@@ -315,7 +235,6 @@ namespace engine {
 
 		// What to render
 		s_RenderAPI->drawVAO(VAO, s_3DData.vertexCount);
-		s_3DData.vertexCount = 0;
 	}
 
 	/*
@@ -798,8 +717,7 @@ namespace engine {
 		return s_3DData.VAO;
 	}
 
-	void Renderer::cleanVAO(GLuint& vao)
-	{
+	void Renderer::cleanVAO(GLuint& vao) {
 		GLint nAttr = 0;
 		std::set<GLuint> vbos;
 
@@ -828,5 +746,24 @@ namespace engine {
 		}
 
 		glDeleteVertexArrays(1, &vao);
+	}
+
+	/*
+		Configures the renderer depth map (S_ShadowMap)
+	*/
+	void Renderer::configDepthMap() {
+		// Depth Shader setup
+		s_ShadowMap.depthShader = s_ShaderLibrary->load("assets/shaders/depth-shader.glsl");
+
+		// Setup Frame buffer object
+		glGenFramebuffers(1, &s_ShadowMap.depthMapFBO);
+		s_ShadowMap.depthMap = m_SPtr<Texture>(s_ShadowMap.WIDTH, s_ShadowMap.HEIGHT);
+		
+		// Attach texture as depth buffer for the FBO
+		glBindFramebuffer(GL_FRAMEBUFFER, s_ShadowMap.depthMapFBO);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, s_ShadowMap.depthMap->getID(), 0);
+		glDrawBuffer(GL_NONE);		// Turn off read/write
+		glReadBuffer(GL_NONE);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);	// Free framebuffer
 	}
 }

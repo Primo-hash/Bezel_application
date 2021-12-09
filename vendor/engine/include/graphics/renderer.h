@@ -4,8 +4,11 @@
 	shaders.
 */
 #pragma once
+#include <set>
+
 #include "engine/precompiled.h"
 #include "engine/include/logger.h"
+#include "engine/include/app-frame.h"
 #include "renderAPI.h"
 #include "camera/orthographic-camera.h"
 #include "camera/perspective-camera.h"
@@ -78,6 +81,7 @@ Medium for storing vertex data before processing
 
 		static GLuint compileModel(std::vector<PolyVertex>& vertices);
 		static void cleanVAO(GLuint& vao);
+		static void configDepthMap();
 
 		/*
 			Following param descriptions:

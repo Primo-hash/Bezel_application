@@ -20,6 +20,7 @@ namespace engine {
 		virtual void clear();
 		virtual void drawIndexed(const s_Ptr<VertexArray>& vertexArray, uint32_t indexCount = 0);
 		virtual void drawVAO(GLuint& VAO, unsigned int size);
+		virtual void drawVAOInstanced(GLuint& VAO, unsigned int size, unsigned int num_instances);
 	};
 
 }

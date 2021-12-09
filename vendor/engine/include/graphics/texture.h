@@ -26,6 +26,8 @@ namespace engine {
 		uint32_t getWidth() const { return m_Width; }
 		uint32_t getHeight() const { return m_Height; }
 
+		uint32_t getID() const { return m_RendererID; }
+
 		void bind(uint32_t slot = 0) const;
 		// Custom operator allowing the comparison of two textures
 		bool operator==(const Texture& other) const { return m_RendererID == ((Texture&)other).m_RendererID; }

@@ -43,7 +43,7 @@ namespace engine {
 		void pushLayer(Layer* layer);			// Inserts layer to LayerStack
 		void popLayer(Layer* layer);			// Pops a layer from the LayerStack
 	private:
-		static AppFrame* s_Instance;			// Application instance called by client
+		static AppFrame* s_Instance;			// Application instance called by client/engine
 		bool m_Running = true;
 
 		// Time

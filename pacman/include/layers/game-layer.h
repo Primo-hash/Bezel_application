@@ -103,7 +103,7 @@ void GameLayer::onUpdate(engine::Time ts) {
 
 	// Render API draw calls
 	engine::Renderer::get().setClearColor({ 0.0f, 0.0f,0.0f, 1.f });
-	engine::Renderer::get().clear();
+	//engine::Renderer::get().clear(); Now run in engine
 
 	// Camera scene init with view projection data setup
 	engine::Renderer::beginScene(m_CameraController.getCamera());

@@ -29,7 +29,7 @@ namespace engine {
 		ENGINE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
 
-		// Simple test window to check the Window class and children's functionality
+		// Simple Window class w/ children's functionality
 		m_Window = std::unique_ptr<Window>(Window::create(m_WindowSpecs));
 		// Default set of keyboard, mouse and application events running by default
 		m_Window->setEventCallback(BIND_EVENT_FN(AppFrame::onEvent));
