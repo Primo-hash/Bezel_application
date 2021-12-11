@@ -96,17 +96,17 @@ Map::Map() {
 	// Assign all positions per ID
 	for (int i = 0; i < ROWMAX; i++) {
 		offsetY = 0;
-		offsetX += 1.f;
+		offsetX += 0.f;
 		for (int j = 0; j < COLUMNMAX; j++) {
 			int value = m_MapMatrix[i][j];
-			offsetY += 1.f;
+			offsetY += 0.f;
 			switch (value) {
 			case 1:		// Wall
 			{
-				m_Walls.push_back(engine::m_SPtr<Wall>(i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z, 1.f, 1.f, 1.f));
+				m_Walls.push_back(engine::m_SPtr<Wall>(i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z, 0.5f, 0.5f, 0.5f));
 				break;
 			}
-			case 2:		// Player/Pacmand
+			case 2:		// Player/Pacman
 			{
 				m_Player = engine::m_SPtr<Pacman>();
 				m_Player->setPosition({ i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z });
@@ -116,7 +116,7 @@ Map::Map() {
 				break;
 			}
 			case 0:	// Pellets and Ghosts
-				m_Pellets.push_back(engine::m_SPtr<Pellet>(i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z, 1.f, 1.f, 1.f));
+				m_Pellets.push_back(engine::m_SPtr<Pellet>(i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z, 0.1f, 0.1f, 0.1f));
 	
 				// Ghost random position generation
 				randomNumber = numDistribution(rando);

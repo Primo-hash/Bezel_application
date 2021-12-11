@@ -1,32 +1,25 @@
-# Blender MTL File: 'untitled.blend'
-# Material Count: 3
+#
+#
+#
 
-newmtl Material.010
-Ns 225.000000
+newmtl Sphere.005_Sphere.001_Sphere.005_Sphere.001_Material.014 Mesh_Material.014
+illum 2
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 2
-
-newmtl Material.012
 Ns 225.000000
+
+newmtl Sphere.006_Sphere.001_Sphere.006_Sphere.001_Material.012 Mesh_Material.012
+illum 2
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 2
-
-newmtl Material.014
 Ns 225.000000
+
+newmtl Sphere.007_Sphere.001_Sphere.007_Sphere.001_Material.010 Mesh_Material.010
+illum 2
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 2
+Ns 225.000000
+
