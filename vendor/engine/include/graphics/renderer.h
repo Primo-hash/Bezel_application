@@ -19,6 +19,7 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 namespace engine {
 
@@ -76,6 +77,8 @@ Medium for storing vertex data before processing
 			std::string name,
 			std::vector<PolyVertex>& vertices,
 			glm::vec3 position,
+			glm::vec3 scale,
+			glm::vec3 rotation,
 			glm::vec4 color,
 			int texID);
 

@@ -565,7 +565,20 @@ namespace engine {
 	void Renderer::draw3DObject(const glm::vec3& position, const glm::vec3& size, const glm::vec3& rotation, const glm::vec4& color, const std::string path, const std::string objectName) {
 		const float texID = 0.f;										// Default texture
 		
-		loadModel(path, objectName, s_3DData.vertices, position, color, texID);
+		// Transform vertices to position then spread vertices to each polygon corner
+		// using TRS method
+		/*
+		glm::mat4 transform = glm::mat4(1.0f);
+		transform = glm::translate(transform, position);
+		transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(1.f, 0.f, 0.f));	// Rotation x-axis
+		transform = glm::rotate(transform, glm::radians(rotation.y), glm::vec3(0.f, 1.f, 0.f));	// Rotation y-axis
+		transform = glm::rotate(transform, glm::radians(rotation.z), glm::vec3(0.f, 0.f, 1.f));	// Rotation z-axis
+		transform = glm::scale(transform, size);												// Scaling
+
+		glm::vec4 posTRS = glm::vec4(position, 1.f) * transform;
+		*/
+		//loadModel(path, objectName, s_3DData.vertices, {posTRS.x, posTRS.y, posTRS.z}, color, texID);
+		loadModel(path, objectName, s_3DData.vertices, position, size, rotation, color, texID);
 
 		/*
 		MeshStore meshStore = s_ObjectLibrary->get(objectName);						// get base object mesh for transformation and queue
@@ -647,12 +660,15 @@ namespace engine {
 		std::string name,
 		std::vector<engine::PolyVertex>& vertices,
 		glm::vec3 position,
+		glm::vec3 scale,
+		glm::vec3 rotation,
 		glm::vec4 color,
 		int texID) {
 
 		RawShape s (s_ObjectLibrary->get(name));	// Copy loaded object from library
 
 		//For each shape defined in the obj file
+		/*
 		for (auto shape : s.shapes) {
 			//We find each mesh
 			for (auto meshIndex : shape.mesh.indices) {
@@ -674,6 +690,45 @@ namespace engine {
 
 				PolyVertex vertex = PolyVertex();
 				vertex.position = vertice;
+				vertex.normal = normal;
+				vertex.texCoord = textureCoordinate;
+				vertex.color = color;
+				vertex.texID = texID;
+
+				vertices.push_back(vertex); //We add our new vertice struct to our vector
+			}
+		}
+		*/
+
+		//For each shape defined in the obj file
+		for (auto shape : s.shapes) {
+			//We find each mesh
+			for (auto meshIndex : shape.mesh.indices) {
+				//And store the data for each vertice, including normals
+				glm::vec3 vertice = {
+					s.attrib.vertices[(double)meshIndex.vertex_index * 3],
+					s.attrib.vertices[((double)meshIndex.vertex_index * 3) + 1],
+					s.attrib.vertices[((double)meshIndex.vertex_index * 3) + 2]
+				};
+
+				vertice = glm::rotateX(vertice, glm::radians(rotation.x));
+				vertice = glm::rotateY(vertice, glm::radians(rotation.y));
+				vertice = glm::rotateZ(vertice, glm::radians(rotation.z));
+
+				vertice *= scale;
+
+				glm::vec3 normal = {
+					s.attrib.normals[(double)meshIndex.normal_index * 3],
+					s.attrib.normals[((double)meshIndex.normal_index * 3) + 1],
+					s.attrib.normals[((double)meshIndex.normal_index * 3) + 2]
+				};
+				glm::vec2 textureCoordinate = {                         //These go unnused, but if you want textures, you will need them.
+					s.attrib.texcoords[(double)meshIndex.texcoord_index * 2],
+					s.attrib.texcoords[((double)meshIndex.texcoord_index * 2) + 1]
+				};
+
+				PolyVertex vertex = PolyVertex();
+				vertex.position = vertice + position;
 				vertex.normal = normal;
 				vertex.texCoord = textureCoordinate;
 				vertex.color = color;

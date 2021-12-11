@@ -91,7 +91,7 @@ Map::Map() {
 	float offsetY = 0.f;
 
 	// Position from camera
-	glm::vec3 cam = { -40, -50, -50 };
+	glm::vec3 cam = { 0, 0, 0 };
 
 	// Assign all positions per ID
 	for (int i = 0; i < ROWMAX; i++) {
@@ -103,20 +103,20 @@ Map::Map() {
 			switch (value) {
 			case 1:		// Wall
 			{
-				m_Walls.push_back(engine::m_SPtr<Wall>(i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z, 0.f, 3.f, 3.f));
+				m_Walls.push_back(engine::m_SPtr<Wall>(i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z, 1.f, 1.f, 1.f));
 				break;
 			}
-			case 2:		// Player/Pacman
+			case 2:		// Player/Pacmand
 			{
 				m_Player = engine::m_SPtr<Pacman>();
 				m_Player->setPosition({ i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z });
 				m_Player->setNextPosition({ i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z });
-				m_Player->setSize({ 1.5f, 1.5f, 1.5f });
+				m_Player->setSize({ 1.f, 1.f, 1.f });
 
 				break;
 			}
 			case 0:	// Pellets and Ghosts
-				m_Pellets.push_back(engine::m_SPtr<Pellet>(i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z, 0.5f, 0.5f, 0.5f));
+				m_Pellets.push_back(engine::m_SPtr<Pellet>(i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z, 1.f, 1.f, 1.f));
 	
 				// Ghost random position generation
 				randomNumber = numDistribution(rando);
@@ -126,7 +126,7 @@ Map::Map() {
 					m_Ghosts.push_back(engine::m_SPtr<Ghost>());
 					m_Ghosts.back()->setPosition({ i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z });
 					m_Ghosts.back()->setNextPosition({ i + offsetX + cam.x, j + offsetY + cam.y, 0.f + cam.z });
-					m_Ghosts.back()->setSize({ 1.5f, 1.5f, 1.5f });
+					m_Ghosts.back()->setSize({ 1.f, 1.f, 1.f });
 				}
 				break;
 			default:

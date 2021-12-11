@@ -35,12 +35,12 @@ public:
 	//accessor methd for size
 	glm::vec3 getSize() { return m_Size; }
 private:
-	float m_radius = 0.4f;         //Radius of pacyman
+	float m_radius = 1.f;         //Radius of pacyman
 	float m_velocity = 2.0f;	   //Velocity of character
 	float m_time = 0.0f;		   //Current time
 
 	float m_rotation = 0.0f; //Rotation of the pacman
-	glm::vec3 m_Rotation = { 0,0,1.f };		//Rotation of character in 3d space
+	glm::vec3 m_Rotation = { 0.f, 0.f, 0.f };		//Rotation of character in 3d space
 
 	glm::vec3 m_NextPosition = { 0,0,0 };
 	glm::vec3 m_position = { 0,0,0 };	   //Position of character
@@ -129,8 +129,8 @@ void Pacman::onUpdate(engine::Time ts)
 
 void Pacman::onRender() 
 {
-	engine::Renderer::draw3DObject({ m_NextPosition.x, m_NextPosition.y, m_NextPosition.z },
-		{ m_Size.x, m_Size.y, m_Size.z },
+	engine::Renderer::draw3DObject(m_NextPosition,
+		m_Size,
 		m_Rotation, {0, 1, 0, 1},
 		"./assets/models/pac",
 		"pac");
